@@ -230,4 +230,25 @@ class GuiPreferencesMigrationsTest {
         PreferencesMigrations.upgradeResolveBibTeXStringsFields(preferences);
         verify(preferences).put(JabRefCliPreferences.RESOLVE_STRINGS_FOR_FIELDS, expectedValue);
     }
+
+    @Test
+    void migrateImportPattern_updatesPrefsNodeEvenIfRunningPrefsDoesNotHaveKey() {
+        // old style exists in the persisted preferences node
+        when(mainPrefsNode.get(JabRefCliPreferences.IMPORT_FILENAMEPATTERN, null))
+                .thenReturn(oldStylePatterns[0]);
+
+        // the running application preferences do not have this key
+        when(preferences.hasKey(JabRefCliPreferences.IMPORT_FILENAMEPATTERN)).thenReturn(false);
+
+        // return the old value
+        when(preferences.get(JabRefCliPreferences.IMPORT_FILENAMEPATTERN)).thenReturn(oldStylePatterns[0]);
+
+        PreferencesMigrations.upgradeImportFileAndDirePatterns(preferences, mainPrefsNode);
+
+        // verify persisted node is migrated
+        verify(mainPrefsNode).put(JabRefCliPreferences.IMPORT_FILENAMEPATTERN, newStylePatterns[0]);
+
+        // verify running prefs are not updated because hasKey() was stubbed to false
+        verify(preferences, never()).put(eq(JabRefCliPreferences.IMPORT_FILENAMEPATTERN), any());
+    }
 }
