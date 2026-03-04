@@ -27,9 +27,16 @@ public class ExternalLinkCreator {
     private static final String DEFAULT_SHORTSCIENCE_SEARCH_URL = "https://www.shortscience.org/internalsearch";
 
     private final ImporterPreferences importerPreferences;
+    private final AuthorListParser authorListParser;
 
     public ExternalLinkCreator(ImporterPreferences importerPreferences) {
+        this(importerPreferences, new AuthorListParser());
+    }
+
+    /// Constructor that allows injection of the AuthorListParser for testing
+    public ExternalLinkCreator(ImporterPreferences importerPreferences, AuthorListParser authorListParser) {
         this.importerPreferences = importerPreferences;
+        this.authorListParser = authorListParser;
     }
 
     // Note: We use configurable templates due to the requirement stated at https://github.com/JabRef/jabref/issues/12268#issuecomment-2523108605
@@ -139,7 +146,6 @@ public class ExternalLinkCreator {
             uriBuilder.addParameter("q", title.trim());
             if (author != null) {
                 if (addAuthorIndex) {
-                    AuthorListParser authorListParser = new AuthorListParser();
                     AuthorList authors = authorListParser.parse(author);
 
                     int idx = 0;
